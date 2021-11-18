@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "31848577927",
+    "project_id": "trackmytraining-1c29b",
+    "storage_bucket": "trackmytraining-1c29b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:31848577927:android:41fa82f2ab1d461f363122",
+        "android_client_info": {
+          "package_name": "com.harrible.training_tracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "31848577927-mj3adj2k6t1eedl01mcf173mg3hrf51l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDGf7mTKaNvQkDXIogc8dTjb9jLgCa3taE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "31848577927-mj3adj2k6t1eedl01mcf173mg3hrf51l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
