@@ -137,7 +137,7 @@ class _PlayerHomeState extends State<PlayerHome> {
     Firebase.initializeApp();
   }
 
-  void _setSignInTime() {
+  void _setSignIn() {
     setState(() {
       _signInTime = DateFormat.Hms().format(DateTime.now());
       print("User: ${widget.user}, Signed in at: ${_signInTime}");
@@ -145,7 +145,7 @@ class _PlayerHomeState extends State<PlayerHome> {
     });
   }
 
-  void _setSignOutTime() {
+  void _setSignOut() {
     setState(() {
       _signOutTime = DateFormat.Hms().format(DateTime.now());
       print("User: ${widget.user} Signed out at: ${_signOutTime}");
@@ -190,14 +190,14 @@ class _PlayerHomeState extends State<PlayerHome> {
                 Padding(
                     padding: EdgeInsets.all(10.0),
                     child: ElevatedButton(
-                      onPressed: _setSignInTime,
+                      onPressed: _setSignIn,
                       child: const Text("Sign in"),
                       // Need to change the size of the buttons and add the sending of the data to firebase for both of them
                     )),
                 Padding(
                     padding: EdgeInsets.all(10.0),
                     child: ElevatedButton(
-                      onPressed: _setSignOutTime,
+                      onPressed: _setSignOut,
                       child: const Text("Sign out"),
                     )),
               ],
