@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 void main() {
   runApp(const MyApp());
 }
@@ -35,13 +34,11 @@ class AnimatedLogo extends AnimatedWidget {
   // Make the Tweens static because they don't change.
   static final _opacityTween = Tween<double>(begin: 0.1, end: 1);
   static final _sizeTween = Tween<double>(begin: 0, end: 300);
-  
-  
+
   @override
   Widget build(BuildContext context) {
     final animation = listenable as Animation<double>;
     return Center(
-      
       child: Opacity(
         opacity: _opacityTween.evaluate(animation),
         child: Container(
@@ -50,65 +47,60 @@ class AnimatedLogo extends AnimatedWidget {
           width: _sizeTween.evaluate(animation),
           child: Image.asset('assets/BlackWellsCollegeW.jpg'),
         ),
-        
       ),
     );
   }
 }
 
+// class LoadingSplash extends StatefulWidget {
+//   //const PlayerList({Key? key, required this.title, required this.user}) : super(key: key);
+//   //final String title;
+//   //final String user;
 
+//   @override
+//   State<LoadingSplash> createState() => _LoadingSplash();
+// }
 
+// class _LoadingSplash extends State<LoadingSplash> {
 
-class LoadingSplash extends StatefulWidget {
-  const PlayerList({Key? key, required this.title, required this.user}) : super(key: key);
-  final String title;
-  final String user;
+//    @override
+//   void initState() {
+//     super.initState();
+//     Firebase.initializeApp();
+//   }
 
-  @override
-  State<LoadingSplash> createState() => _LoadingSplash();
-}
+// // 888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
+// //                                Build
+//   @override
+//   Widget build(BuildContext context) {
+//     CollectionReference users = FirebaseFirestore.instance.collection('Users');
 
-class _LoadingSplash extends State<LoadingSplash> {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text(widget.title),
+//       ),
+//       // body: StreamBuilder(
+//       //     stream: FirebaseFirestore.instance.collection("Users").snapshots(),
+//       //     builder:(context, snapshot) {
+//       //       if (!snapshot.hasData) return const Text('Loading...');
+//       //       return ListView.builder(
+//       //         itemExtent: 88.0,
+//       //         itemBuilder: (context, index) =>
+//       //           );
+//       //     } ,
+//       // ),
+//     );
+//   }
+// }
 
-   @override
-  void initState() {
-    super.initState();
-    Firebase.initializeApp();
-  }
-
-// 888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
-//                                Build
-  @override
-  Widget build(BuildContext context) {
-    CollectionReference users = FirebaseFirestore.instance.collection('Users');
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      // body: StreamBuilder(
-      //     stream: FirebaseFirestore.instance.collection("Users").snapshots(),
-      //     builder:(context, snapshot) {
-      //       if (!snapshot.hasData) return const Text('Loading...');
-      //       return ListView.builder(
-      //         itemExtent: 88.0,
-      //         itemBuilder: (context, index) => 
-      //           ); 
-      //     } ,
-      // ),
-    );
-  }
-}
-
-// class User {
+// // class User {
 //    String name;
 //    String signIn;
 //    String signOut;
 
-   
 //    User(String name, String signIn, String signOut{
 //       this.name = name;
-//       this.signIn = signIn;     
+//       this.signIn = signIn;
 //       this.signOut = signOut;
 //    }
 
@@ -121,10 +113,9 @@ class _LoadingSplash extends State<LoadingSplash> {
 //   // }
 // }
 
-
-
 class PlayerHome extends StatefulWidget {
-  const PlayerHome({Key? key, required this.title, required this.user}) : super(key: key);
+  const PlayerHome({Key? key, required this.title, required this.user})
+      : super(key: key);
   final String title;
   final String user;
 
@@ -134,23 +125,24 @@ class PlayerHome extends StatefulWidget {
 
 class _PlayerHomeState extends State<PlayerHome> {
   String _signInTime = "";
+  String _signInLoc = "";
   String _signOutTime = "";
+  String _signOutLoc = "";
   String _date = '';
 
-   @override
+  @override
   void initState() {
     super.initState();
-    
+
     Firebase.initializeApp();
   }
+
   void _setSignInTime() {
     setState(() {
       _signInTime = DateFormat.Hms().format(DateTime.now());
       print("User: ${widget.user}, Signed in at: ${_signInTime}");
       _date = DateFormat.yMd().format(DateTime.now());
-      
     });
-    
   }
 
   void _setSignOutTime() {
@@ -162,24 +154,24 @@ class _PlayerHomeState extends State<PlayerHome> {
 
 // This submit json should just be nested in the _setSignOutTime method but for now its working and I dont want to fuck with it
   void _submitInfo() {
-    FirebaseFirestore.instance.collection("Users").add(
-      {
-        "Name": widget.user,
-        "Sign in time" : _signInTime,
-        "Sign out time" : _signOutTime,
-        "date": _date
-      }
-    );
+    FirebaseFirestore.instance.collection("Users").add({
+      "Name": widget.user,
+      "Sign in time": _signInTime,
+      "Sign out time": _signOutTime,
+      "date": _date
+    });
   }
 
   void viewPlayers() {
     Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) =>
-              PlayerList(
-                title: 'Player List', user: widget.user,)
-          ));
+        context,
+        MaterialPageRoute(
+            builder: (context) => PlayerList(
+                  title: 'Player List',
+                  user: widget.user,
+                )));
   }
+
 // 888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
 //                                Build
   @override
@@ -189,42 +181,39 @@ class _PlayerHomeState extends State<PlayerHome> {
         title: Text(widget.title),
       ),
       body: Center(
-
         child: Column(
-
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-
-                Padding(padding: EdgeInsets.all(10.0),
-                  child: ElevatedButton(
-                    onPressed: _setSignInTime,
-                    child: const Text("Sign in"),
-                  // Need to change the size of the buttons and add the sending of the data to firebase for both of them
-                )),
-
-                Padding(padding: EdgeInsets.all(10.0),
-                  child: ElevatedButton(
-                    onPressed:  _setSignOutTime,
-                    child: const Text("Sign out"),
-                )),
+                Padding(
+                    padding: EdgeInsets.all(10.0),
+                    child: ElevatedButton(
+                      onPressed: _setSignInTime,
+                      child: const Text("Sign in"),
+                      // Need to change the size of the buttons and add the sending of the data to firebase for both of them
+                    )),
+                Padding(
+                    padding: EdgeInsets.all(10.0),
+                    child: ElevatedButton(
+                      onPressed: _setSignOutTime,
+                      child: const Text("Sign out"),
+                    )),
               ],
             ),
-            Padding(padding: EdgeInsets.all(10.0),
-              child: ElevatedButton(
-                child: Text("submit info"),
-                onPressed: _submitInfo,
-              )
-            ),
-
-            Padding(padding: EdgeInsets.all(10.0),
-              child: ElevatedButton(
-                child: Text("View Player list"),
-                onPressed: viewPlayers,
-              )
-            ),
+            Padding(
+                padding: EdgeInsets.all(10.0),
+                child: ElevatedButton(
+                  child: Text("submit info"),
+                  onPressed: _submitInfo,
+                )),
+            Padding(
+                padding: EdgeInsets.all(10.0),
+                child: ElevatedButton(
+                  child: Text("View Player list"),
+                  onPressed: viewPlayers,
+                )),
           ],
         ),
       ),
@@ -255,6 +244,7 @@ class _LoginPageState extends State<LoginPage> {
     print("saving name as: ${prefs.getString("key")}");
     //return true;
   }
+
   _removeName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.clear();
@@ -269,10 +259,11 @@ class _LoginPageState extends State<LoginPage> {
       setState(() {});
       Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) =>
-              PlayerHome(
-                title: 'Testing page routing', user: '${prefs.getString('key')}',)
-          ));
+          MaterialPageRoute(
+              builder: (context) => PlayerHome(
+                    title: 'Testing page routing',
+                    user: '${prefs.getString('key')}',
+                  )));
       print(prefs.getString("key"));
     }
   }
@@ -284,7 +275,6 @@ class _LoginPageState extends State<LoginPage> {
     // Start listening to changes.
     userController.addListener(_setUserName);
     //passController.addListener(_printLatestValue);
-
   }
 
   void _setUserName() {
@@ -294,26 +284,26 @@ class _LoginPageState extends State<LoginPage> {
 
   void submitAuth() {
     if (userName != "") {
-      if (_nameSaved){
+      if (_nameSaved) {
         _saveName(userName);
-      }
-      else {
+      } else {
         _removeName();
       }
 
       Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) =>
-              PlayerHome(
-                title: 'Testing page routing', user: '${userController.text}',)
-          ));
+          MaterialPageRoute(
+              builder: (context) => PlayerHome(
+                    title: 'Testing page routing',
+                    user: '${userController.text}',
+                  )));
     }
   }
+
 // 888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
 //                              Build
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: Colors.transparent,
       // appBar: AppBar(
@@ -322,22 +312,17 @@ class _LoginPageState extends State<LoginPage> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-              colors: [
-                Color(0xD1D1D1FF),
-                Color(0xFFFFFFFF)
-              ],
+              colors: [Color(0xD1D1D1FF), Color(0xFFFFFFFF)],
               begin: FractionalOffset(0.0, 1.0),
               end: FractionalOffset(0.0, 0.0),
               stops: [0.0, 1.0],
               tileMode: TileMode.clamp),
         ),
-
         child: ListView(
-          
           // ignore: prefer_const_literals_to_create_immutables
           children: <Widget>[
-
-            Padding(padding: EdgeInsets.only(bottom: 50.0, top: 50.0),
+            Padding(
+              padding: EdgeInsets.only(bottom: 50.0, top: 50.0),
               child: Image.asset('assets/BlackWellsCollegeW.jpg'),
             ),
 
@@ -366,21 +351,19 @@ class _LoginPageState extends State<LoginPage> {
               ],
             ),
 
-            Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Padding(padding: EdgeInsets.all(10.0),
-                      child: ElevatedButton(
-                        onPressed: submitAuth,
-                        child: Text("Submit"),
-                        style: ElevatedButton.styleFrom(
-                          primary: Colors.red,
-                          shadowColor: Colors.black,
-                          minimumSize: Size(100.0,30.0),
-                        ),
-                      )),
-                ]),
-
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+              Padding(
+                  padding: EdgeInsets.all(10.0),
+                  child: ElevatedButton(
+                    onPressed: submitAuth,
+                    child: Text("Submit"),
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.red,
+                      shadowColor: Colors.black,
+                      minimumSize: Size(100.0, 30.0),
+                    ),
+                  )),
+            ]),
           ],
         ),
       ),
@@ -388,12 +371,9 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
-
-
-
-
 class PlayerList extends StatefulWidget {
-  const PlayerList({Key? key, required this.title, required this.user}) : super(key: key);
+  const PlayerList({Key? key, required this.title, required this.user})
+      : super(key: key);
   final String title;
   final String user;
 
@@ -402,8 +382,7 @@ class PlayerList extends StatefulWidget {
 }
 
 class _PlayerList extends State<PlayerList> {
-
-   @override
+  @override
   void initState() {
     super.initState();
     Firebase.initializeApp();
@@ -425,11 +404,10 @@ class _PlayerList extends State<PlayerList> {
       //       if (!snapshot.hasData) return const Text('Loading...');
       //       return ListView.builder(
       //         itemExtent: 88.0,
-      //         itemBuilder: (context, index) => 
-      //           ); 
+      //         itemBuilder: (context, index) =>
+      //           );
       //     } ,
       // ),
     );
   }
 }
-
