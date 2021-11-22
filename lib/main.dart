@@ -9,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:location/location.dart';
 
 void main() {
   runApp(const MyApp());
@@ -141,6 +142,7 @@ class _PlayerHomeState extends State<PlayerHome> {
   }
 
   void _setSignIn() {
+    setSigninLoc();
     setState(() {
       _signInTime = DateFormat.Hms().format(DateTime.now());
       print("User: ${widget.user}, Signed in at: ${_signInTime}");
@@ -149,6 +151,7 @@ class _PlayerHomeState extends State<PlayerHome> {
   }
 
   void _setSignOut() {
+    setSignoutLoc();
     setState(() {
       _signOutTime = DateFormat.Hms().format(DateTime.now());
       print("User: ${widget.user} Signed out at: ${_signOutTime}");
@@ -157,17 +160,47 @@ class _PlayerHomeState extends State<PlayerHome> {
 
 // This submit json should just be nested in the _setSignOutTime method but for now its working and I dont want to fuck with it
   void _submitInfo() {
-    FirebaseFirestore.instance.collection("Users").add({
-      "Name": widget.user,
-      "Sign in time": _signInTime,
-      "Sign out time": _signOutTime,
-      "date": _date
-    });
+    if (_signInTime == "" || _signOutTime == '') {
+    } else {
+      FirebaseFirestore.instance.collection("Users").add({
+        "Name": widget.user,
+        "Sign in time": _signInTime,
+        "Sign out time": _signOutTime,
+        "date": _date,
+        "sign in LOC": _signInLoc,
+        "sign out LOC": _signOutLoc,
+      });
+    }
   }
 
   void viewPlayers() {
     Navigator.push(
         context, MaterialPageRoute(builder: (context) => UserInformation()));
+  }
+
+  void setSigninLoc() async {
+    Location location = Location();
+    LocationData _locationData;
+
+    _locationData = await location.getLocation();
+    print(
+        "Longitude is: ${_locationData.longitude} Latitude is: ${_locationData.latitude}");
+    setState(() {
+      _signInLoc = '${_locationData.latitude} , ${_locationData.longitude}';
+    });
+  }
+
+  void setSignoutLoc() async {
+    Location location = Location();
+    LocationData _locationData;
+
+    _locationData = await location.getLocation();
+    print(
+        "Longitude is: ${_locationData.longitude} Latitude is: ${_locationData.latitude}");
+
+    setState(() {
+      _signOutLoc = '${_locationData.latitude} , ${_locationData.longitude}';
+    });
   }
 
 // 888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
