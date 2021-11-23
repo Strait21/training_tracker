@@ -197,6 +197,25 @@ class _PlayerHomeState extends State<PlayerHome> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
 
+  Widget Extras(BuildContext context) {
+    return DropdownButton(items: [
+      DropdownMenuItem(
+        child: IconButton(
+          icon: const Icon(Icons.logout),
+          onPressed: () {
+            Navigator.of(context)
+                .push<void>(_createRoute(widget.title, widget.user, "Logout"));
+          },
+        ),
+      ),
+      DropdownMenuItem(
+          child: IconButton(
+        icon: Icon(Icons.settings),
+        onPressed: () {},
+      ))
+    ]);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -204,6 +223,7 @@ class _PlayerHomeState extends State<PlayerHome> {
         automaticallyImplyLeading: false,
         backgroundColor: Color(0xFF333333),
         title: Text('Home'),
+        actions: [Extras(context)],
       ),
       body: TableCalendar(
         firstDay: DateTime.utc(2019),
@@ -296,6 +316,8 @@ class _LiftLogState extends State<LiftLog> {
   GeoPoint? _signInLoc;
   DateTime? _signOutTime;
   GeoPoint? _signOutLoc;
+  bool _signInPushed = false;
+  bool _signOutPushed = false;
 
   @override
   void initState() {
@@ -303,23 +325,36 @@ class _LiftLogState extends State<LiftLog> {
   }
 
   void _setSignIn() {
-    setSigninLoc();
+    if (!_signInPushed) {
+      setSigninLoc();
+      setState(() {
+        _signInTime = DateTime.now();
+        print("User: ${widget.user}, Signed in at: ${_signInTime}");
+      });
+    }
     setState(() {
-      _signInTime = DateTime.now();
-      print("User: ${widget.user}, Signed in at: ${_signInTime}");
+      _signInPushed = !_signInPushed;
     });
   }
 
   void _setSignOut() {
-    setSignoutLoc();
+    if (!_signOutPushed) {
+      setSignoutLoc();
+      setState(() {
+        _signOutTime = DateTime.now();
+        print("User: ${widget.user} Signed out at: ${_signOutTime}");
+      });
+    }
     setState(() {
-      _signOutTime = DateTime.now();
-      print("User: ${widget.user} Signed out at: ${_signOutTime}");
+      // maybe we can have a lose Progress dialog pop up here???
+      _signOutPushed = !_signOutPushed;
     });
   }
 
   void _submitInfo() {
     if (_signInTime == null || _signOutTime == null) {
+// Pop up dialog to state which button needs to be pressed
+
     } else {
       FirebaseFirestore.instance.collection("Users").add({
         "Name": widget.user,
@@ -564,6 +599,21 @@ Route _createRoute(String title, String user, String page) {
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           var tween =
               Tween<Offset>(begin: const Offset(-1.0, 0.0), end: Offset.zero);
+          var curveTween = CurveTween(curve: Curves.ease);
+
+          return SlideTransition(
+            position: animation.drive(curveTween).drive(tween),
+            child: child,
+          );
+        });
+  }
+  if (page == "Logout") {
+    LoginPage page = LoginPage(title: "login");
+    return PageRouteBuilder<SlideTransition>(
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          var tween =
+              Tween<Offset>(begin: const Offset(0.0, -1.0), end: Offset.zero);
           var curveTween = CurveTween(curve: Curves.ease);
 
           return SlideTransition(
