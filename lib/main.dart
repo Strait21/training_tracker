@@ -1,5 +1,4 @@
 import 'dart:async';
-//import 'dart:html';
 
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -32,8 +31,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// 888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
-//                        Sign in sign out
 class PlayerHome extends StatefulWidget {
   const PlayerHome({Key? key, required this.title, required this.user})
       : super(key: key);
@@ -45,6 +42,85 @@ class PlayerHome extends StatefulWidget {
 }
 
 class _PlayerHomeState extends State<PlayerHome> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Text(widget.title),
+        backgroundColor: Color(0xFF333333),
+      ),
+      body: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                child: Text("Calender shoudl go at the top ( 7 day )"),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              SizedBox(
+                height: 100.0,
+              ),
+              Container(
+                child: Text(
+                    "Todays calender going vertically with 1 hr before first event at 1st time"),
+              )
+            ],
+          )
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Color(0xFF333333),
+        selectedItemColor: Color(0xFF999999),
+        unselectedItemColor: Colors.blue,
+        items: [
+          BottomNavigationBarItem(
+              icon: IconButton(
+                icon: Icon(Icons.person),
+                onPressed: () {
+                  Navigator.of(context).push<void>(
+                      _createRoute(widget.title, widget.user, "LiftLog"));
+                },
+              ),
+              label: "LiftLog"),
+          BottomNavigationBarItem(
+              icon: IconButton(
+                icon: Icon(Icons.home),
+                onPressed: () {},
+              ),
+              label: "Home"),
+          BottomNavigationBarItem(
+              icon: IconButton(
+                icon: Icon(Icons.list),
+                onPressed: () {
+                  Navigator.of(context).push<void>(
+                      _createRoute(widget.title, widget.user, "Database"));
+                },
+              ),
+              label: "Database"),
+        ],
+      ),
+    );
+  }
+}
+
+// 888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
+//                        LiftLog
+class LiftLog extends StatefulWidget {
+  const LiftLog({Key? key, required this.title, required this.user})
+      : super(key: key);
+  final String title;
+  final String user;
+
+  @override
+  State<LiftLog> createState() => _LiftLogState();
+}
+
+class _LiftLogState extends State<LiftLog> {
   String _signInTime = "";
   String _signInLoc = "";
   String _signOutTime = "";
@@ -89,14 +165,6 @@ class _PlayerHomeState extends State<PlayerHome> {
     }
   }
 
-  void viewPlayers() {
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) =>
-                UserInformation(title: widget.title, user: widget.user)));
-  }
-
   void setSigninLoc() async {
     Location location = Location();
     LocationData _locationData;
@@ -126,6 +194,7 @@ class _PlayerHomeState extends State<PlayerHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Color(0xFF333333),
         title: Text(widget.title),
       ),
@@ -177,10 +246,17 @@ class _PlayerHomeState extends State<PlayerHome> {
         items: [
           BottomNavigationBarItem(
               icon: IconButton(
-                icon: Icon(
-                  Icons.home,
-                ),
+                icon: Icon(Icons.person),
                 onPressed: () {},
+              ),
+              label: "LiftLog"),
+          BottomNavigationBarItem(
+              icon: IconButton(
+                icon: Icon(Icons.home),
+                onPressed: () {
+                  Navigator.of(context).push<void>(
+                      _createRoute(widget.title, widget.user, "Home"));
+                },
               ),
               label: "Home"),
           BottomNavigationBarItem(
@@ -188,7 +264,7 @@ class _PlayerHomeState extends State<PlayerHome> {
                 icon: Icon(Icons.list_alt),
                 onPressed: () {
                   Navigator.of(context).push<void>(
-                      _createRoute(widget.title, widget.user, "Home"));
+                      _createRoute(widget.title, widget.user, "Database"));
                 },
               ),
               label: "Database"),
@@ -236,7 +312,7 @@ class _LoginPageState extends State<LoginPage> {
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => PlayerHome(
+              builder: (context) => LiftLog(
                     title: 'Testing page routing',
                     user: '${prefs.getString('key')}',
                   )));
@@ -270,7 +346,7 @@ class _LoginPageState extends State<LoginPage> {
           context,
           MaterialPageRoute(
               builder: (context) => PlayerHome(
-                    title: 'Testing page routing',
+                    title: 'Home',
                     user: '${userController.text}',
                   )));
     }
@@ -299,6 +375,7 @@ class _LoginPageState extends State<LoginPage> {
               padding: EdgeInsets.only(bottom: 50.0, top: 50.0),
               child: Image.asset('assets/HGlogo.png'),
             ),
+            Text("Harrible Garner"),
 
             // ignore: prefer_const_constructors
             Padding(
@@ -385,6 +462,7 @@ class _UserInformationState extends State<UserInformation> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Color(0xFF333333),
         title: Text('PlayerList'),
       ),
@@ -406,10 +484,19 @@ class _UserInformationState extends State<UserInformation> {
         items: [
           BottomNavigationBarItem(
               icon: IconButton(
+                icon: Icon(Icons.person),
+                onPressed: () {
+                  Navigator.of(context).push<void>(
+                      _createRoute(widget.title, widget.user, "LiftLog"));
+                },
+              ),
+              label: "LiftLog"),
+          BottomNavigationBarItem(
+              icon: IconButton(
                 icon: Icon(Icons.home),
                 onPressed: () {
                   Navigator.of(context).push<void>(
-                      _createRoute(widget.title, widget.user, "Database"));
+                      _createRoute(widget.title, widget.user, "Home"));
                 },
               ),
               label: "Home"),
@@ -433,14 +520,27 @@ class _UserInformationState extends State<UserInformation> {
 //                            Routing
 
 Route _createRoute(String title, String user, String page) {
-  if (page == "Home") {
-    print("moving form Home");
+  if (page == "Database") {
     UserInformation page = UserInformation(title: title, user: user);
     return PageRouteBuilder<SlideTransition>(
         pageBuilder: (context, animation, secondaryAnimation) => page,
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           var tween =
-              Tween<Offset>(begin: const Offset(0.0, 1.0), end: Offset.zero);
+              Tween<Offset>(begin: const Offset(1.0, 0.0), end: Offset.zero);
+          var curveTween = CurveTween(curve: Curves.ease);
+
+          return SlideTransition(
+            position: animation.drive(curveTween).drive(tween),
+            child: child,
+          );
+        });
+  } else if (page == "LiftLog") {
+    LiftLog page = LiftLog(title: title, user: user);
+    return PageRouteBuilder<SlideTransition>(
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          var tween =
+              Tween<Offset>(begin: const Offset(-1.0, 0.0), end: Offset.zero);
           var curveTween = CurveTween(curve: Curves.ease);
 
           return SlideTransition(
@@ -450,7 +550,6 @@ Route _createRoute(String title, String user, String page) {
         });
   } else {
     PlayerHome page = PlayerHome(title: title, user: user);
-    print("Moving from somewhere other than home");
     return PageRouteBuilder<SlideTransition>(
         pageBuilder: (context, animation, secondaryAnimation) => page,
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
