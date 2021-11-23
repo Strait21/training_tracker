@@ -9,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:location/location.dart';
 
 void main() {
@@ -114,7 +115,10 @@ class _PlayerHomeState extends State<PlayerHome> {
 
   void viewPlayers() {
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => UserInformation()));
+        context,
+        MaterialPageRoute(
+            builder: (context) =>
+                UserInformation(title: widget.title, user: widget.user)));
   }
 
   void setSigninLoc() async {
@@ -148,11 +152,12 @@ class _PlayerHomeState extends State<PlayerHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Color(0xFF333333),
         title: Text(widget.title),
       ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -188,14 +193,43 @@ class _PlayerHomeState extends State<PlayerHome> {
                   child: Text("submit info"),
                   onPressed: _submitInfo,
                 )),
-            Padding(
-                padding: EdgeInsets.all(10.0),
-                child: ElevatedButton(
-                  child: Text("View Player list"),
-                  onPressed: viewPlayers,
-                )),
           ],
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Color(0xFF333333),
+        unselectedItemColor: Color(0xFF666666),
+        selectedItemColor: Colors.blue,
+        items: [
+          BottomNavigationBarItem(
+              icon: IconButton(
+                icon: Icon(
+                  Icons.home,
+                ),
+                onPressed: () {
+                  // Navigator.push(
+                  //     context,
+                  //     MaterialPageRoute(
+                  //         builder: (context) => PlayerHome(
+                  //               title: 'Testing page routing',
+                  //               user: widget.user,
+                  //             )));
+                },
+              ),
+              label: "Home"),
+          BottomNavigationBarItem(
+              icon: IconButton(
+                icon: Icon(Icons.list_alt),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => UserInformation(
+                              title: widget.title, user: widget.user)));
+                },
+              ),
+              label: "Database"),
+        ],
       ),
     );
   }
@@ -303,7 +337,7 @@ class _LoginPageState extends State<LoginPage> {
           children: <Widget>[
             Padding(
               padding: EdgeInsets.only(bottom: 50.0, top: 50.0),
-              child: Image.asset('assets/BlackWellsCollegeW.jpg'),
+              child: Image.asset('assets/HGlogo.png'),
             ),
 
             // ignore: prefer_const_constructors
@@ -338,7 +372,7 @@ class _LoginPageState extends State<LoginPage> {
                     onPressed: submitAuth,
                     child: Text("Submit"),
                     style: ElevatedButton.styleFrom(
-                      primary: Colors.red,
+                      primary: Color(0x666666),
                       shadowColor: Colors.black,
                       minimumSize: Size(100.0, 30.0),
                     ),
@@ -352,6 +386,10 @@ class _LoginPageState extends State<LoginPage> {
 }
 
 class UserInformation extends StatefulWidget {
+  const UserInformation({Key? key, required this.title, required this.user})
+      : super(key: key);
+  final String title;
+  final String user;
   @override
   _UserInformationState createState() => _UserInformationState();
 }
@@ -360,42 +398,31 @@ class _UserInformationState extends State<UserInformation> {
   final Stream<QuerySnapshot> _usersStream =
       FirebaseFirestore.instance.collection('Users').snapshots();
 
+  void deleteUser(String documentID) {
+    FirebaseFirestore.instance.collection("Users").doc(documentID).delete();
+  }
+
   Widget _buildList(BuildContext context, DocumentSnapshot document) {
     if (document.data()['date'] == '') return const SizedBox(height: 10.0);
-    return ListTile(
-      title: Row(
-        children: [
-          Column(
-            children: [
-              Text(document.data()['Name']),
-              Text(
-                  ' ${document.data()['Sign in time']} : ${document.data()['Sign out time']} : ${document.data()['date']}'),
-            ],
-          ),
-          Padding(
-              padding: const EdgeInsets.only(left: 50.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                      onPressed: () {
-                        FirebaseFirestore.instance
-                            .collection("Users")
-                            .doc(document.id)
-                            .delete();
-                      },
-                      child: Text("Delete"))
-                ],
-              )),
-        ],
+    return (ListTile(
+      title: Text(document.data()['Name']),
+      subtitle: Text(
+          ' ${document.data()['Sign in time']} : ${document.data()['Sign out time']} : ${document.data()['date']}'),
+      trailing: IconButton(
+        icon: Icon(Icons.delete),
+        onPressed: () => deleteUser(document.id),
       ),
-    );
+      onTap: () {
+        print("Ive tapped a player");
+      },
+    ));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Color(0xFF333333),
         title: Text('PlayerList'),
       ),
       body: StreamBuilder<QuerySnapshot>(
@@ -409,7 +436,38 @@ class _UserInformationState extends State<UserInformation> {
           );
         },
       ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Color(0xFF333333),
+        selectedItemColor: Color(0xFF999999),
+        unselectedItemColor: Colors.blue,
+        items: [
+          BottomNavigationBarItem(
+              icon: IconButton(
+                icon: Icon(Icons.home),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => PlayerHome(
+                                title: 'Testing page routing',
+                                user: widget.user,
+                              )));
+                },
+              ),
+              label: "Home"),
+          BottomNavigationBarItem(
+              icon: IconButton(
+                icon: Icon(Icons.list),
+                onPressed: () {
+                  // Navigator.push(
+                  //     context,
+                  //     MaterialPageRoute(
+                  //         builder: (context) => UserInformation()));
+                },
+              ),
+              label: "Database"),
+        ],
+      ),
     );
   }
 }
-
