@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -173,6 +174,8 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
+// 888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
+//                              Player Home
 class PlayerHome extends StatefulWidget {
   const PlayerHome({Key? key, required this.title, required this.user})
       : super(key: key);
@@ -184,7 +187,13 @@ class PlayerHome extends StatefulWidget {
 }
 
 class _PlayerHomeState extends State<PlayerHome> {
-  CalendarFormat _calendarFormat = CalendarFormat.month;
+  @override
+  void initState() {
+    super.initState();
+    Firebase.initializeApp();
+  }
+
+  CalendarFormat _calendarFormat = CalendarFormat.twoWeeks;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
 
@@ -201,6 +210,10 @@ class _PlayerHomeState extends State<PlayerHome> {
         lastDay: DateTime.utc(2024),
         focusedDay: _focusedDay,
         calendarFormat: _calendarFormat,
+        availableCalendarFormats: const {
+          CalendarFormat.twoWeeks: 'twoWeeks',
+          CalendarFormat.week: "Week"
+        },
         selectedDayPredicate: (day) {
           // Use `selectedDayPredicate` to determine which day is currently selected.
           // If this returns true, then `day` will be marked as selected.
@@ -279,44 +292,39 @@ class LiftLog extends StatefulWidget {
 }
 
 class _LiftLogState extends State<LiftLog> {
-  String _signInTime = "";
-  String _signInLoc = "";
-  String _signOutTime = "";
-  String _signOutLoc = "";
-  String _date = '';
+  DateTime? _signInTime;
+  GeoPoint? _signInLoc;
+  DateTime? _signOutTime;
+  GeoPoint? _signOutLoc;
 
   @override
   void initState() {
     super.initState();
-
-    Firebase.initializeApp();
   }
 
   void _setSignIn() {
     setSigninLoc();
     setState(() {
-      _signInTime = DateFormat.Hms().format(DateTime.now());
+      _signInTime = DateTime.now();
       print("User: ${widget.user}, Signed in at: ${_signInTime}");
-      _date = DateFormat.yMd().format(DateTime.now());
     });
   }
 
   void _setSignOut() {
     setSignoutLoc();
     setState(() {
-      _signOutTime = DateFormat.Hms().format(DateTime.now());
+      _signOutTime = DateTime.now();
       print("User: ${widget.user} Signed out at: ${_signOutTime}");
     });
   }
 
   void _submitInfo() {
-    if (_signInTime == "" || _signOutTime == '') {
+    if (_signInTime == null || _signOutTime == null) {
     } else {
       FirebaseFirestore.instance.collection("Users").add({
         "Name": widget.user,
         "Sign in time": _signInTime,
         "Sign out time": _signOutTime,
-        "date": _date,
         "sign in LOC": _signInLoc,
         "sign out LOC": _signOutLoc,
       });
@@ -328,10 +336,10 @@ class _LiftLogState extends State<LiftLog> {
     LocationData _locationData;
 
     _locationData = await location.getLocation();
-    print(
-        "Longitude is: ${_locationData.longitude} Latitude is: ${_locationData.latitude}");
     setState(() {
-      _signInLoc = '${_locationData.latitude} , ${_locationData.longitude}';
+      _signInLoc = GeoPoint(_locationData.latitude, _locationData.longitude);
+
+      // _signInLoc = '${_locationData.latitude} , ${_locationData.longitude}';
     });
   }
 
@@ -344,7 +352,8 @@ class _LiftLogState extends State<LiftLog> {
         "Longitude is: ${_locationData.longitude} Latitude is: ${_locationData.latitude}");
 
     setState(() {
-      _signOutLoc = '${_locationData.latitude} , ${_locationData.longitude}';
+      _signOutLoc = GeoPoint(_locationData.latitude, _locationData.longitude);
+      // _signOutLoc = '${_locationData.latitude} , ${_locationData.longitude}';
     });
   }
 
@@ -372,7 +381,7 @@ class _LiftLogState extends State<LiftLog> {
                           child: const Text("Sign in"),
                           // Need to change the size of the buttons
                         )),
-                    Text(_signInTime),
+                    //Text(_signInTime),
                   ],
                 ),
                 Column(
@@ -383,7 +392,7 @@ class _LiftLogState extends State<LiftLog> {
                           onPressed: _setSignOut,
                           child: const Text("Sign out"),
                         )),
-                    Text(_signOutTime),
+                    // Text(_signOutTime),
                   ],
                 ),
               ],
@@ -445,19 +454,23 @@ class UserInformation extends StatefulWidget {
 }
 
 class _UserInformationState extends State<UserInformation> {
-  final Stream<QuerySnapshot> _usersStream =
-      FirebaseFirestore.instance.collection('Users').snapshots();
-
   void deleteUser(String documentID) {
     FirebaseFirestore.instance.collection("Users").doc(documentID).delete();
   }
 
   Widget _buildList(BuildContext context, DocumentSnapshot document) {
+    Duration difference = document
+        .data()["Sign out time"]
+        .toDate()
+        .difference(document.data()["Sign in time"].toDate());
+
     if (document.data()['date'] == '') return const SizedBox(height: 10.0);
     return (ListTile(
       title: Text(document.data()['Name']),
-      subtitle: Text(
-          ' ${document.data()['Sign in time']} : ${document.data()['Sign out time']} : ${document.data()['date']}'),
+      subtitle: Text(difference.toString()),
+
+      //Text(
+      //     ' ${document.data()['Sign in time']} : ${document.data()['Sign out time']}'),
       trailing: IconButton(
         icon: Icon(Icons.delete),
         onPressed: () => deleteUser(document.id),
