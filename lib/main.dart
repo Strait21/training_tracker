@@ -32,31 +32,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class AnimatedLogo extends AnimatedWidget {
-  const AnimatedLogo({Key? key, required Animation<double> animation})
-      : super(key: key, listenable: animation);
-
-  // Make the Tweens static because they don't change.
-  static final _opacityTween = Tween<double>(begin: 0.1, end: 1);
-  static final _sizeTween = Tween<double>(begin: 0, end: 300);
-
-  @override
-  Widget build(BuildContext context) {
-    final animation = listenable as Animation<double>;
-    return Center(
-      child: Opacity(
-        opacity: _opacityTween.evaluate(animation),
-        child: Container(
-          margin: const EdgeInsets.symmetric(vertical: 10),
-          height: _sizeTween.evaluate(animation),
-          width: _sizeTween.evaluate(animation),
-          child: Image.asset('assets/BlackWellsCollegeW.jpg'),
-        ),
-      ),
-    );
-  }
-}
-
 class PlayerHome extends StatefulWidget {
   const PlayerHome({Key? key, required this.title, required this.user})
       : super(key: key);
@@ -221,11 +196,8 @@ class _PlayerHomeState extends State<PlayerHome> {
               icon: IconButton(
                 icon: Icon(Icons.list_alt),
                 onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => UserInformation(
-                              title: widget.title, user: widget.user)));
+                  Navigator.of(context).push<void>(
+                      _createRoute(widget.title, widget.user, "Home"));
                 },
               ),
               label: "Database"),
@@ -445,13 +417,8 @@ class _UserInformationState extends State<UserInformation> {
               icon: IconButton(
                 icon: Icon(Icons.home),
                 onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => PlayerHome(
-                                title: 'Testing page routing',
-                                user: widget.user,
-                              )));
+                  Navigator.of(context).push<void>(
+                      _createRoute(widget.title, widget.user, "Database"));
                 },
               ),
               label: "Home"),
@@ -469,5 +436,41 @@ class _UserInformationState extends State<UserInformation> {
         ],
       ),
     );
+  }
+}
+// 888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
+//                            Routing
+
+Route _createRoute(String title, String user, String page) {
+  if (page == "Home") {
+    print("moving form Home");
+    UserInformation page = UserInformation(title: title, user: user);
+    return PageRouteBuilder<SlideTransition>(
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          var tween =
+              Tween<Offset>(begin: const Offset(0.0, 1.0), end: Offset.zero);
+          var curveTween = CurveTween(curve: Curves.ease);
+
+          return SlideTransition(
+            position: animation.drive(curveTween).drive(tween),
+            child: child,
+          );
+        });
+  } else {
+    PlayerHome page = PlayerHome(title: title, user: user);
+    print("Moving from somewhere other than home");
+    return PageRouteBuilder<SlideTransition>(
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          var tween =
+              Tween<Offset>(begin: const Offset(0.0, -1.0), end: Offset.zero);
+          var curveTween = CurveTween(curve: Curves.ease);
+
+          return SlideTransition(
+            position: animation.drive(curveTween).drive(tween),
+            child: child,
+          );
+        });
   }
 }
