@@ -32,6 +32,8 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// 888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
+//                        Sign in sign out
 class PlayerHome extends StatefulWidget {
   const PlayerHome({Key? key, required this.title, required this.user})
       : super(key: key);
@@ -73,7 +75,6 @@ class _PlayerHomeState extends State<PlayerHome> {
     });
   }
 
-// This submit json should just be nested in the _setSignOutTime method but for now its working and I dont want to fuck with it
   void _submitInfo() {
     if (_signInTime == "" || _signOutTime == '') {
     } else {
@@ -121,8 +122,6 @@ class _PlayerHomeState extends State<PlayerHome> {
     });
   }
 
-// 888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
-//                                Build
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -144,7 +143,7 @@ class _PlayerHomeState extends State<PlayerHome> {
                         child: ElevatedButton(
                           onPressed: _setSignIn,
                           child: const Text("Sign in"),
-                          // Need to change the size of the buttons and add the sending of the data to firebase for both of them
+                          // Need to change the size of the buttons
                         )),
                     Text(_signInTime),
                   ],
@@ -181,15 +180,7 @@ class _PlayerHomeState extends State<PlayerHome> {
                 icon: Icon(
                   Icons.home,
                 ),
-                onPressed: () {
-                  // Navigator.push(
-                  //     context,
-                  //     MaterialPageRoute(
-                  //         builder: (context) => PlayerHome(
-                  //               title: 'Testing page routing',
-                  //               user: widget.user,
-                  //             )));
-                },
+                onPressed: () {},
               ),
               label: "Home"),
           BottomNavigationBarItem(
@@ -285,8 +276,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-// 888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
-//                              Build
   @override
   Widget build(BuildContext context) {
     return Scaffold(
