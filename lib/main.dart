@@ -207,6 +207,9 @@ class _PlayerHomeState extends State<PlayerHome> {
   }
 }
 
+// 888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
+//                                Login page state
+
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key, required this.title}) : super(key: key);
   final String title;
@@ -215,14 +218,10 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-// 888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
 class _LoginPageState extends State<LoginPage> {
-//                        Variables
   String userName = '';
   final userController = TextEditingController();
   bool _nameSaved = false;
-// 888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
-//                         Functions
 
   _saveName(string) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -356,6 +355,9 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+
+// 8888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
+//                                  User Information list
 
 class UserInformation extends StatefulWidget {
   const UserInformation({Key? key, required this.title, required this.user})
