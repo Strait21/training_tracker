@@ -10,6 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:location/location.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 void main() {
   runApp(const MyApp());
@@ -30,6 +31,147 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+// 888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
+//                                Login page state
+
+class LoginPage extends StatefulWidget {
+  const LoginPage({Key? key, required this.title}) : super(key: key);
+  final String title;
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  String userName = '';
+  final userController = TextEditingController();
+  bool _nameSaved = false;
+
+  _saveName(string) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('key', string);
+    print("saving name as: ${prefs.getString("key")}");
+    //return true;
+  }
+
+  _removeName() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.clear();
+    print("Removing name: ${prefs.getString('key')}");
+    return true;
+  }
+
+  _getSavedName() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.getString('key') != null) {
+      userName = prefs.getString("key")!;
+      setState(() {});
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => PlayerHome(
+                    title: 'Home',
+                    user: '${prefs.getString('key')}',
+                  )));
+      print(prefs.getString("key"));
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getSavedName();
+    // Start listening to changes.
+    userController.addListener(_setUserName);
+    //passController.addListener(_printLatestValue);
+  }
+
+  void _setUserName() {
+    userName = userController.text;
+    //print('Username is: ${userName}');
+  }
+
+  void submitAuth() {
+    if (userName != "") {
+      if (_nameSaved) {
+        _saveName(userName);
+      } else {
+        _removeName();
+      }
+      Navigator.of(context)
+          .push<void>(_createRoute(widget.title, userName, "Home"));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      // appBar: AppBar(
+      //   title: Text(widget.title),
+      // ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+              colors: [Color(0xD1D1D1FF), Color(0xFFFFFFFF)],
+              begin: FractionalOffset(0.0, 1.0),
+              end: FractionalOffset(0.0, 0.0),
+              stops: [0.0, 1.0],
+              tileMode: TileMode.clamp),
+        ),
+        child: ListView(
+          // ignore: prefer_const_literals_to_create_immutables
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.only(bottom: 50.0, top: 50.0),
+              child: Image.asset('assets/HGlogo.png'),
+            ),
+            Text("Harrible Garner"),
+
+            // ignore: prefer_const_constructors
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: TextFormField(
+                controller: userController,
+                decoration: const InputDecoration(
+                  border: UnderlineInputBorder(),
+                  labelText: 'Name',
+                ),
+              ),
+            ),
+            Row(
+              children: <Widget>[
+                Checkbox(
+                  value: _nameSaved,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      _nameSaved = !_nameSaved;
+                    });
+                  },
+                ),
+                const Text("Remember your name?")
+              ],
+            ),
+
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+              Padding(
+                  padding: EdgeInsets.all(10.0),
+                  child: ElevatedButton(
+                    onPressed: submitAuth,
+                    child: Text("Submit"),
+                    style: ElevatedButton.styleFrom(
+                      primary: Color(0x666666),
+                      shadowColor: Colors.black,
+                      minimumSize: Size(100.0, 30.0),
+                    ),
+                  )),
+            ]),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class PlayerHome extends StatefulWidget {
   const PlayerHome({Key? key, required this.title, required this.user})
@@ -42,36 +184,52 @@ class PlayerHome extends StatefulWidget {
 }
 
 class _PlayerHomeState extends State<PlayerHome> {
+  CalendarFormat _calendarFormat = CalendarFormat.month;
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text(widget.title),
         backgroundColor: Color(0xFF333333),
+        title: Text('Home'),
       ),
-      body: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                child: Text("Calender shoudl go at the top ( 7 day )"),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              SizedBox(
-                height: 100.0,
-              ),
-              Container(
-                child: Text(
-                    "Todays calender going vertically with 1 hr before first event at 1st time"),
-              )
-            ],
-          )
-        ],
+      body: TableCalendar(
+        firstDay: DateTime.utc(2019),
+        lastDay: DateTime.utc(2024),
+        focusedDay: _focusedDay,
+        calendarFormat: _calendarFormat,
+        selectedDayPredicate: (day) {
+          // Use `selectedDayPredicate` to determine which day is currently selected.
+          // If this returns true, then `day` will be marked as selected.
+
+          // Using `isSameDay` is recommended to disregard
+          // the time-part of compared DateTime objects.
+          return isSameDay(_selectedDay, day);
+        },
+        onDaySelected: (selectedDay, focusedDay) {
+          if (!isSameDay(_selectedDay, selectedDay)) {
+            // Call `setState()` when updating the selected day
+            setState(() {
+              _selectedDay = selectedDay;
+              _focusedDay = focusedDay;
+            });
+          }
+        },
+        onFormatChanged: (format) {
+          if (_calendarFormat != format) {
+            // Call `setState()` when updating calendar format
+            setState(() {
+              _calendarFormat = format;
+            });
+          }
+        },
+        onPageChanged: (focusedDay) {
+          // No need to call `setState()` here
+          _focusedDay = focusedDay;
+        },
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Color(0xFF333333),
@@ -269,154 +427,6 @@ class _LiftLogState extends State<LiftLog> {
               ),
               label: "Database"),
         ],
-      ),
-    );
-  }
-}
-
-// 888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
-//                                Login page state
-
-class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key, required this.title}) : super(key: key);
-  final String title;
-
-  @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  String userName = '';
-  final userController = TextEditingController();
-  bool _nameSaved = false;
-
-  _saveName(string) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString('key', string);
-    print("saving name as: ${prefs.getString("key")}");
-    //return true;
-  }
-
-  _removeName() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.clear();
-    print("Removing name: ${prefs.getString('key')}");
-    return true;
-  }
-
-  _getSavedName() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (prefs.getString('key') != null) {
-      userName = prefs.getString("key")!;
-      setState(() {});
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => LiftLog(
-                    title: 'Testing page routing',
-                    user: '${prefs.getString('key')}',
-                  )));
-      print(prefs.getString("key"));
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _getSavedName();
-    // Start listening to changes.
-    userController.addListener(_setUserName);
-    //passController.addListener(_printLatestValue);
-  }
-
-  void _setUserName() {
-    userName = userController.text;
-    //print('Username is: ${userName}');
-  }
-
-  void submitAuth() {
-    if (userName != "") {
-      if (_nameSaved) {
-        _saveName(userName);
-      } else {
-        _removeName();
-      }
-
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => PlayerHome(
-                    title: 'Home',
-                    user: '${userController.text}',
-                  )));
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      // appBar: AppBar(
-      //   title: Text(widget.title),
-      // ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-              colors: [Color(0xD1D1D1FF), Color(0xFFFFFFFF)],
-              begin: FractionalOffset(0.0, 1.0),
-              end: FractionalOffset(0.0, 0.0),
-              stops: [0.0, 1.0],
-              tileMode: TileMode.clamp),
-        ),
-        child: ListView(
-          // ignore: prefer_const_literals_to_create_immutables
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.only(bottom: 50.0, top: 50.0),
-              child: Image.asset('assets/HGlogo.png'),
-            ),
-            Text("Harrible Garner"),
-
-            // ignore: prefer_const_constructors
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: TextFormField(
-                controller: userController,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'Name',
-                ),
-              ),
-            ),
-            Row(
-              children: <Widget>[
-                Checkbox(
-                  value: _nameSaved,
-                  onChanged: (bool? value) {
-                    setState(() {
-                      _nameSaved = !_nameSaved;
-                    });
-                  },
-                ),
-                const Text("Remember your name?")
-              ],
-            ),
-
-            Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
-              Padding(
-                  padding: EdgeInsets.all(10.0),
-                  child: ElevatedButton(
-                    onPressed: submitAuth,
-                    child: Text("Submit"),
-                    style: ElevatedButton.styleFrom(
-                      primary: Color(0x666666),
-                      shadowColor: Colors.black,
-                      minimumSize: Size(100.0, 30.0),
-                    ),
-                  )),
-            ]),
-          ],
-        ),
       ),
     );
   }
