@@ -7,11 +7,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:location/location.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() {
   runApp(const MyApp());
@@ -28,13 +28,13 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const LoginPage(title: 'Logging in'),
+      home: const LoginPage(title: 'Log in'),
     );
   }
 }
+
 // 888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888888
 //                                Login page state
-
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key, required this.title}) : super(key: key);
   final String title;
@@ -44,63 +44,21 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  String userName = '';
-  final userController = TextEditingController();
-  bool _nameSaved = false;
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  _saveName(string) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString('key', string);
-    print("saving name as: ${prefs.getString("key")}");
-    //return true;
-  }
-
-  _removeName() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.clear();
-    print("Removing name: ${prefs.getString('key')}");
-    return true;
-  }
-
-  _getSavedName() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (prefs.getString('key') != null) {
-      userName = prefs.getString("key")!;
-      setState(() {});
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => PlayerHome(
-                    title: 'Home',
-                    user: '${prefs.getString('key')}',
-                  )));
-      print(prefs.getString("key"));
+  void _loginUserEmail(String email, String password) async {
+    try {
+      await _auth.signInWithEmailAndPassword(
+          email: email.trim(), password: password);
+    } catch (e) {
+      print(e);
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _getSavedName();
-    // Start listening to changes.
-    userController.addListener(_setUserName);
-    //passController.addListener(_printLatestValue);
-  }
-
-  void _setUserName() {
-    userName = userController.text;
-    //print('Username is: ${userName}');
-  }
-
-  void submitAuth() {
-    if (userName != "") {
-      if (_nameSaved) {
-        _saveName(userName);
-      } else {
-        _removeName();
-      }
-      Navigator.of(context)
-          .push<void>(_createRoute(widget.title, userName, "Home"));
+    if (_auth.currentUser() != null) {
+      print("Success");
+      Navigator.of(context).push<void>(
+          _createRoute(widget.title, _auth.currentUser().toString(), "Home"));
     }
   }
 
@@ -127,38 +85,36 @@ class _LoginPageState extends State<LoginPage> {
               padding: EdgeInsets.only(bottom: 50.0, top: 50.0),
               child: Image.asset('assets/HGlogo.png'),
             ),
-            Text("Harrible Garner"),
 
             // ignore: prefer_const_constructors
             Padding(
               padding: EdgeInsets.all(8.0),
               child: TextFormField(
-                controller: userController,
+                controller: _emailController,
                 decoration: const InputDecoration(
                   border: UnderlineInputBorder(),
-                  labelText: 'Name',
+                  labelText: 'Email',
                 ),
               ),
             ),
-            Row(
-              children: <Widget>[
-                Checkbox(
-                  value: _nameSaved,
-                  onChanged: (bool? value) {
-                    setState(() {
-                      _nameSaved = !_nameSaved;
-                    });
-                  },
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: TextFormField(
+                controller: _passwordController,
+                decoration: const InputDecoration(
+                  border: UnderlineInputBorder(),
+                  labelText: 'Password',
                 ),
-                const Text("Remember your name?")
-              ],
+                obscureText: true,
+              ),
             ),
 
             Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
               Padding(
                   padding: EdgeInsets.all(10.0),
                   child: ElevatedButton(
-                    onPressed: submitAuth,
+                    onPressed: () => _loginUserEmail(
+                        _emailController.text, _passwordController.text),
                     child: Text("Submit"),
                     style: ElevatedButton.styleFrom(
                       primary: Color(0x666666),
@@ -187,6 +143,8 @@ class PlayerHome extends StatefulWidget {
 }
 
 class _PlayerHomeState extends State<PlayerHome> {
+  FirebaseAuth _auth = FirebaseAuth.instance;
+
   @override
   void initState() {
     super.initState();
@@ -205,7 +163,7 @@ class _PlayerHomeState extends State<PlayerHome> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Color(0xFF333333),
-        title: Text('Home'),
+        title: Text(''),
       ),
       body: TableCalendar(
         firstDay: DateTime.utc(2019),
