@@ -193,28 +193,11 @@ class _PlayerHomeState extends State<PlayerHome> {
     Firebase.initializeApp();
   }
 
+  String dropdownValue = 'One';
+
   CalendarFormat _calendarFormat = CalendarFormat.twoWeeks;
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-
-  Widget Extras(BuildContext context) {
-    return DropdownButton(items: [
-      DropdownMenuItem(
-        child: IconButton(
-          icon: const Icon(Icons.logout),
-          onPressed: () {
-            Navigator.of(context)
-                .push<void>(_createRoute(widget.title, widget.user, "Logout"));
-          },
-        ),
-      ),
-      DropdownMenuItem(
-          child: IconButton(
-        icon: Icon(Icons.settings),
-        onPressed: () {},
-      ))
-    ]);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -223,7 +206,6 @@ class _PlayerHomeState extends State<PlayerHome> {
         automaticallyImplyLeading: false,
         backgroundColor: Color(0xFF333333),
         title: Text('Home'),
-        actions: [Extras(context)],
       ),
       body: TableCalendar(
         firstDay: DateTime.utc(2019),
@@ -627,9 +609,8 @@ Route _createRoute(String title, String user, String page) {
         pageBuilder: (context, animation, secondaryAnimation) => page,
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           var tween =
-              Tween<Offset>(begin: const Offset(0.0, -1.0), end: Offset.zero);
+              Tween<Offset>(begin: const Offset(0.0, 0.0), end: Offset.zero);
           var curveTween = CurveTween(curve: Curves.ease);
-
           return SlideTransition(
             position: animation.drive(curveTween).drive(tween),
             child: child,
