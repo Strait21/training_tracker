@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:location/location.dart';
@@ -47,20 +48,56 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  String errorMessage = '';
+  String successMessage = '';
 
-  void _loginUserEmail(String email, String password) async {
+  Future<FirebaseUser?> signIn(String email, String password) async {
     try {
-      await _auth.signInWithEmailAndPassword(
-          email: email.trim(), password: password);
-    } catch (e) {
-      print(e);
-    }
-    if (_auth.currentUser() != null) {
-      print("Success");
-      Navigator.of(context).push<void>(
-          _createRoute(widget.title, _auth.currentUser().toString(), "Home"));
+      FirebaseUser user = await _auth.signInWithEmailAndPassword(
+          email: email, password: password);
+
+      assert(user != null);
+      assert(await user.getIdToken() != null);
+
+      final FirebaseUser currentUser = await _auth.currentUser();
+      assert(user.uid == currentUser.uid);
+      return user;
+    } on PlatformException catch (_, e) {
+      handleError(_);
+      return null;
     }
   }
+  handleError(PlatformException error) {
+    print(error);
+    switch (error.code) {
+      case 'ERROR_USER_NOT_FOUND':
+        setState(() {
+          errorMessage = 'User Not Found!!!';
+        });
+        break;
+      case 'ERROR_WRONG_PASSWORD':
+        setState(() {
+          errorMessage = 'Wrong Password!!!';
+        });
+        break;
+    }
+  }
+
+  void submitAuth(String _email,String _password) {
+    signIn(_email, _password).then((user) {
+                                if (user != null) {
+                                  print('Logged in successfully.');
+                                  setState(() {
+                                    successMessage =
+                                        'Logged in successfully.\nYou can now navigate to Home Page.';
+                                  });
+                                } else {
+                                  print('Error while Login.');
+                                }
+  });
+  }
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -113,8 +150,7 @@ class _LoginPageState extends State<LoginPage> {
               Padding(
                   padding: EdgeInsets.all(10.0),
                   child: ElevatedButton(
-                    onPressed: () => _loginUserEmail(
-                        _emailController.text, _passwordController.text),
+                    onPressed: () => submitAuth(_emailController.text, _passwordController.text),
                     child: Text("Submit"),
                     style: ElevatedButton.styleFrom(
                       primary: Color(0x666666),
